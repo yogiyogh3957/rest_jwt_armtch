@@ -39,8 +39,8 @@ def signup_user():
             dataModel = AuthModel(username=dataUsername, password=hashed_password, active=int(dataIsactive))
             db.session.add(dataModel)
             db.session.commit()
-            return make_response(jsonify({"msg": "Registrasi berhasil"}), 200)
-        return jsonify({"msg": "Username / Password tidak boleh kosong"})
+            return make_response(jsonify({"msg": "Register Success"}), 200)
+        return jsonify({"msg": "Username / Password cannot empty"})
     else:
         return jsonify({"msg": "Username registered"})
 
@@ -52,9 +52,9 @@ def login_user():
     user = AuthModel.query.filter_by(username=dataUsername).one_or_none()
 
     if not user:
-        return jsonify({"msg": "Login gagal, silahkan coba lagi !!!"})
+        return jsonify({"msg": "User not Registered, please register !!!"})
     if not check_password_hash(user.password, dataPassword):
-        return jsonify({"msg": "Password Salah, silahkan coba lagi !!!"})
+        return jsonify({"msg": "Wrong Password, please try again !!!"})
     else:
         access_token = create_access_token(identity=user)
         return jsonify(access_token=access_token)
@@ -64,7 +64,7 @@ def login_user():
 def logout():
     jti = get_jwt()["jti"]
     jwt_redis_blocklist.set(jti, "", ex=Config_app.ACCESS_EXPIRES)
-    return jsonify(msg="logout sukses")
+    return jsonify(msg="logout success")
 
 @app.route('/api/addbook', methods=['POST'])
 @jwt_required()
@@ -95,7 +95,7 @@ def edit_book(id):
     book_to_edit.content = dataContent
 
     db.session.commit()
-    return jsonify({"msg":"data_edited"})
+    return make_response(jsonify({"msg":"data_edited"}), 200)
 
 @app.route('/api/getallbook', methods=['GET'])
 @jwt_required()
@@ -130,7 +130,7 @@ def get_all_book():
         'count_data_per_page' : books.per_page,
 
     }
-    return jsonify({'data': output, "meta": meta})
+    return make_response(jsonify({'data': output, "meta": meta}), 200)
 
 @app.route('/api/getbookbyid/<int:id>', methods=['GET'])
 @jwt_required()
@@ -156,7 +156,7 @@ def get_book_by_id(id):
         }
         data_output.append(output)
     print(data_output)
-    return jsonify(data_output)
+    return make_response(jsonify(data_output), 200)
 
 @app.route('/api/delete_book/<int:id>', methods=['POST'])
 @jwt_required()
@@ -166,4 +166,4 @@ def delete_book(id):
     activity_to_delete.deleted = dataDeleted
 
     db.session.commit()
-    return jsonify({"msg":"data_status_deleted"})
+    return make_response(jsonify({"msg":"data_status_is_deleted"}), 200)
