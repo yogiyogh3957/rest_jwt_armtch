@@ -7,11 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from main import app, db, jwt_app
 
 import redis
-# jwt_redis_blocklist = redis.StrictRedis(
-#     host="redis-14313.c239.us-east-1-2.ec2.cloud.redislabs.com", port=14313, db=0, decode_responses=True, password='WUfXdziRszDKEcZHMN5iOVMcoZgI6j5s'
-# )
 jwt_redis_blocklist = redis.StrictRedis(
-    host="172.104.34.112", port=6379, db=0, decode_responses=True, password='foobared'
+    host="redis-14313.c239.us-east-1-2.ec2.cloud.redislabs.com", port=14313, db=0, decode_responses=True, password=Config_app.cloud_redis_pwd
 )
 
 @jwt_app.token_in_blocklist_loader
@@ -28,10 +25,6 @@ def user_identity_lookup(user):
 def user_lookup_callback(_jwt_header, jwt_data):
     identity = jwt_data["sub"]
     return AuthModel.query.filter_by(id=identity).one_or_none()
-
-@app.route('/home')
-def home():
-    return render_template("index.html")
 
 @app.route('/api/register', methods=['POST'])
 def signup_user():
